@@ -1,0 +1,41 @@
+# Maintainer: Stephen Kraus (github.com/stephenmk)
+
+pkgname=edrdg-dictionary-archive-utils-git
+_reponame="${pkgname%-*}"
+pkgver=r24.6d525c7
+pkgrel=1
+pkgdesc='Software for reading and updating data in the EDRDG dictionary archive'
+arch=('any')
+url='https://github.com/Jitendex/edrdg-dictionary-archive-utils'
+license=('Apache-2.0')
+depends=('fish' 'git' 'rsync' 'brotli' 'grep' 'patch' 'diffutils')
+makedepends=()
+provides=('edrdg-dictionary-archive-utils')
+conflicts=('edrdg-dictionary-archive-utils')
+source=("git+${url}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+    cd "$_reponame"
+    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
+}
+
+package() {
+    cd "$srcdir"
+
+    install -Dm755 \
+        "$_reponame"/edrdg_dictionary_archive.fish \
+        "$pkgdir"/usr/bin/edrdg_dictionary_archive
+
+    install -Dm644 \
+        "$_reponame"/edrdg-dictionary-archive-update.{timer,service} \
+        -t "$pkgdir"/usr/lib/systemd/system/
+
+    install -Dm644 \
+        "$_reponame"/README.md \
+        -t "$pkgdir"/usr/share/doc/"$_reponame"/
+
+    install -Dm644 \
+        "$_reponame"/LICENSE \
+        -t "$pkgdir"/usr/share/licenses/"$_reponame"/
+}
