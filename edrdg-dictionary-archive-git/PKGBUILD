@@ -3,17 +3,35 @@
 pkgname=edrdg-dictionary-archive-utils-git
 _reponame="${pkgname%-*}"
 pkgver=r24.6d525c7
+_servicename='edrdg-dictionary-archive-update'
 pkgrel=1
 pkgdesc='Software for reading and updating data in the EDRDG dictionary archive'
 arch=('any')
 url='https://github.com/Jitendex/edrdg-dictionary-archive-utils'
 license=('Apache-2.0')
-depends=('fish' 'git' 'rsync' 'brotli' 'grep' 'patch' 'diffutils')
+depends=('fish' 'git' 'rsync' 'brotli' 'grep' 'patch' 'diffutils' 'gnupg')
 makedepends=()
 provides=('edrdg-dictionary-archive-utils')
 conflicts=('edrdg-dictionary-archive-utils')
-source=("git+${url}.git")
-sha256sums=('SKIP')
+source=(
+    "git+${url}.git"
+    'sysusers.conf'
+    'tmpfiles.conf'
+    'gpg-public-key'
+    'gpg-private-key'
+    'git-credentials'
+    'gitconfig'
+)
+sha256sums=(
+    'SKIP'
+    'e9862908982aaeb5887411d5668729e41f62c65d3371c357752b6c120bb6a344'
+    '6ebe30286d5a769f987d4da17bf2aa58a5359a75521b836a85472a7bb7885136'
+    '1ba43ab178fdbc9d1b8cbd685b6069ead642403c291c31bf1c80c23ab6d4583a'
+    'SKIP'
+    'SKIP'
+    '61f4406ac336c405711060a2296235b50a70fd1688bd38d97ab0c5e7a16a814f'
+)
+install="${_reponame}.install"
 
 pkgver() {
     cd "$_reponame"
@@ -24,18 +42,45 @@ package() {
     cd "$srcdir"
 
     install -Dm755 \
-        "$_reponame"/edrdg_dictionary_archive.fish \
-        "$pkgdir"/usr/bin/edrdg_dictionary_archive
+            "$_reponame"/edrdg_dictionary_archive.fish \
+            "$pkgdir"/usr/bin/edrdg_dictionary_archive
 
     install -Dm644 \
-        "$_reponame"/edrdg-dictionary-archive-update.{timer,service} \
-        -t "$pkgdir"/usr/lib/systemd/system/
+            sysusers.conf \
+            "$pkgdir"/usr/lib/sysusers.d/"$_servicename".conf
 
     install -Dm644 \
-        "$_reponame"/README.md \
-        -t "$pkgdir"/usr/share/doc/"$_reponame"/
+            tmpfiles.conf \
+            "$pkgdir"/usr/lib/tmpfiles.d/"$_servicename".conf
 
     install -Dm644 \
-        "$_reponame"/LICENSE \
-        -t "$pkgdir"/usr/share/licenses/"$_reponame"/
+            gpg-public-key \
+            "$pkgdir"/usr/share/"$_servicename"/gpg-public-key.asc
+
+    install -dm700 \
+            "$pkgdir"/usr/share/"$_servicename"/secrets/
+
+    install -Dm600 \
+            gpg-private-key \
+            "$pkgdir"/usr/share/"$_servicename"/secrets/gpg-private-key.asc
+
+    install -Dm600 \
+            git-credentials \
+            "$pkgdir"/usr/share/"$_servicename"/secrets/.git-credentials
+
+    install -Dm644 \
+            gitconfig \
+            "$pkgdir"/usr/share/"$_servicename"/.gitconfig
+
+    install -Dm644 \
+            "$_reponame"/edrdg-dictionary-archive-update.{timer,service} \
+            -t "$pkgdir"/usr/lib/systemd/system/
+
+    install -Dm644 \
+            "$_reponame"/README.md \
+            -t "$pkgdir"/usr/share/doc/"$_reponame"/
+
+    install -Dm644 \
+            "$_reponame"/LICENSE \
+            -t "$pkgdir"/usr/share/licenses/"$_reponame"/
 }

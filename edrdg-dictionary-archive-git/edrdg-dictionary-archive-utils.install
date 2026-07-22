@@ -1,0 +1,30 @@
+_servicename='edrdg-dictionary-archive-update'
+_root=/usr/share/"$_servicename"
+_home=/var/lib/"$_servicename"
+
+post_install() {
+    systemd-sysusers
+    systemd-tmpfiles --create
+
+    install -m600 -o "$_servicename" -g "$_servicename" \
+        "$_root"/secrets/.git-credentials \
+        -t "$_home"
+
+    install -m644 -o "$_servicename" -g "$_servicename" \
+        "$_root"/.gitconfig \
+        -t "$_home"
+
+    install -m600 -o "$_servicename" -g "$_servicename" \
+        "$_root"/secrets/gpg-private-key.asc \
+        -t "$_home"
+
+    su - "$_servicename" \
+        --shell /usr/bin/bash \
+        --command "gpg --import \"${_root}/gpg-public-key.asc\" \"${_home}/gpg-private-key.asc\""
+
+    rm "$_home"/gpg-private-key.asc
+}
+
+post_upgrade() {
+    post_install
+}

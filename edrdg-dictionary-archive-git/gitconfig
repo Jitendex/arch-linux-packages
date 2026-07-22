@@ -1,0 +1,8 @@
+[user]
+	name = edrdg-dictionary-archive-update
+	email = edrdg-dictionary-archive-update@jitendex.org
+	signingkey = 513A26CCF8C682E7
+[commit]
+	gpgsign = true
+[credential]
+	helper = store
