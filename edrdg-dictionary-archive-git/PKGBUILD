@@ -15,8 +15,6 @@ provides=('edrdg-dictionary-archive-utils')
 conflicts=('edrdg-dictionary-archive-utils')
 source=(
     "git+${url}.git"
-    'sysusers.conf'
-    'tmpfiles.conf'
     'gpg-public-key'
     'gpg-private-key'
     'git-credentials'
@@ -24,8 +22,6 @@ source=(
 )
 sha256sums=(
     'SKIP'
-    'e9862908982aaeb5887411d5668729e41f62c65d3371c357752b6c120bb6a344'
-    '6ebe30286d5a769f987d4da17bf2aa58a5359a75521b836a85472a7bb7885136'
     '1ba43ab178fdbc9d1b8cbd685b6069ead642403c291c31bf1c80c23ab6d4583a'
     'SKIP'
     'SKIP'
@@ -41,17 +37,37 @@ pkgver() {
 package() {
     cd "$srcdir"
 
+    ### the main script ###
     install -Dm755 \
             "$_reponame"/edrdg_dictionary_archive.fish \
             "$pkgdir"/usr/bin/edrdg_dictionary_archive
 
+    ### documentation files ###
     install -Dm644 \
-            sysusers.conf \
+            "$_reponame"/README.md \
+            -t "$pkgdir"/usr/share/doc/"$_reponame"/
+
+    install -Dm644 \
+            "$_reponame"/LICENSE \
+            -t "$pkgdir"/usr/share/licenses/"$_reponame"/
+
+    ### systemd files ###
+    install -Dm644 \
+            "$_reponame"/systemd/edrdg-dictionary-archive-update.{timer,service} \
+            -t "$pkgdir"/usr/lib/systemd/system/
+
+    install -Dm644 \
+            "$_reponame"/systemd/"$_servicename".sysusers \
             "$pkgdir"/usr/lib/sysusers.d/"$_servicename".conf
 
     install -Dm644 \
-            tmpfiles.conf \
+            "$_reponame"/systemd/"$_servicename".tmpfiles \
             "$pkgdir"/usr/lib/tmpfiles.d/"$_servicename".conf
+
+    ### credential and config files ###
+    install -Dm644 \
+            gitconfig \
+            "$pkgdir"/usr/share/"$_servicename"/.gitconfig
 
     install -Dm644 \
             gpg-public-key \
@@ -67,20 +83,4 @@ package() {
     install -Dm600 \
             git-credentials \
             "$pkgdir"/usr/share/"$_servicename"/secrets/.git-credentials
-
-    install -Dm644 \
-            gitconfig \
-            "$pkgdir"/usr/share/"$_servicename"/.gitconfig
-
-    install -Dm644 \
-            "$_reponame"/edrdg-dictionary-archive-update.{timer,service} \
-            -t "$pkgdir"/usr/lib/systemd/system/
-
-    install -Dm644 \
-            "$_reponame"/README.md \
-            -t "$pkgdir"/usr/share/doc/"$_reponame"/
-
-    install -Dm644 \
-            "$_reponame"/LICENSE \
-            -t "$pkgdir"/usr/share/licenses/"$_reponame"/
 }
