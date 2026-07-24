@@ -1,9 +1,7 @@
 # Maintainer: Stephen Kraus (github.com/stephenmk)
 
-pkgname=edrdg-dictionary-archive-utils-git
-_reponame="${pkgname%-*}"
-pkgver=r24.6d525c7
-_servicename='edrdg-dictionary-archive-update'
+pkgname=edrdg-dictionary-archive-utils
+pkgver=20260723.0
 pkgrel=1
 pkgdesc='Software for reading and updating data in the EDRDG dictionary archive'
 arch=('any')
@@ -11,57 +9,52 @@ url='https://github.com/Jitendex/edrdg-dictionary-archive-utils'
 license=('Apache-2.0')
 depends=('fish' 'git' 'rsync' 'brotli' 'grep' 'patch' 'diffutils' 'gnupg')
 makedepends=()
-provides=('edrdg-dictionary-archive-utils')
-conflicts=('edrdg-dictionary-archive-utils')
+_fullname="${pkgname}-${pkgver}"
 source=(
-    "git+${url}.git"
+    "${url}/releases/download/${pkgver}/${_fullname}.tar.gz"
+    'gitconfig'
     'gpg-public-key'
     'gpg-private-key'
     'git-credentials'
-    'gitconfig'
 )
-sha256sums=(
+sha512sums=(
+    'daf9d8e2cb7709b434fece5e742326559073ae9d458a66b0b8df1090915e0575d36c13b9bf2730bf39343cfd55fde979a2bff6096e7a0b944634844279ec741c'
+    '9e9df333df033d3e1559e1c8a0fc0f8c9fc5c808fc3a0e0b7e729caa5e3883c33189070cca9899cc0f18d85fbc50e6fa1277e069f92ccc87cf7705418e239d94'
+    '316d76866e84dd8d2ec8dde2a0b9437f4ca0c812e35d7510fa5adcba0a7c2e63416112533ac3c06cf776454e26b23126809d978011ffd1e89152dce02f9087e1'
     'SKIP'
-    '1ba43ab178fdbc9d1b8cbd685b6069ead642403c291c31bf1c80c23ab6d4583a'
     'SKIP'
-    'SKIP'
-    '61f4406ac336c405711060a2296235b50a70fd1688bd38d97ab0c5e7a16a814f'
 )
-install="${_reponame}.install"
-
-pkgver() {
-    cd "$_reponame"
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short=7 HEAD)"
-}
+install="${pkgname}.install"
+_servicename='edrdg-dictionary-archive-update'
 
 package() {
     cd "$srcdir"
 
     ### the main script ###
     install -Dm755 \
-            "$_reponame"/edrdg_dictionary_archive.fish \
+            "$_fullname"/edrdg_dictionary_archive.fish \
             "$pkgdir"/usr/bin/edrdg_dictionary_archive
 
     ### documentation files ###
     install -Dm644 \
-            "$_reponame"/README.md \
-            -t "$pkgdir"/usr/share/doc/"$_reponame"/
+            "$_fullname"/README.md \
+            -t "$pkgdir"/usr/share/doc/"$pkgname"/
 
     install -Dm644 \
-            "$_reponame"/LICENSE \
-            -t "$pkgdir"/usr/share/licenses/"$_reponame"/
+            "$_fullname"/LICENSE \
+            -t "$pkgdir"/usr/share/licenses/"$pkgname"/
 
     ### systemd files ###
     install -Dm644 \
-            "$_reponame"/systemd/edrdg-dictionary-archive-update.{timer,service} \
+            "$_fullname"/systemd/edrdg-dictionary-archive-update.{timer,service} \
             -t "$pkgdir"/usr/lib/systemd/system/
 
     install -Dm644 \
-            "$_reponame"/systemd/"$_servicename".sysusers \
+            "$_fullname"/systemd/"$_servicename".sysusers \
             "$pkgdir"/usr/lib/sysusers.d/"$_servicename".conf
 
     install -Dm644 \
-            "$_reponame"/systemd/"$_servicename".tmpfiles \
+            "$_fullname"/systemd/"$_servicename".tmpfiles \
             "$pkgdir"/usr/lib/tmpfiles.d/"$_servicename".conf
 
     ### credential and config files ###
