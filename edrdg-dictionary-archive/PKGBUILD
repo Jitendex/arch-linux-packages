@@ -2,6 +2,7 @@
 
 pkgname=edrdg-dictionary-archive-utils
 pkgver=20260723.0
+_pkg="${pkgname}-${pkgver}"
 pkgrel=1
 pkgdesc='Software for reading and updating data in the EDRDG dictionary archive'
 arch=('any')
@@ -9,9 +10,8 @@ url='https://github.com/Jitendex/edrdg-dictionary-archive-utils'
 license=('Apache-2.0')
 depends=('fish' 'git' 'rsync' 'brotli' 'grep' 'patch' 'diffutils' 'gnupg')
 makedepends=()
-_fullname="${pkgname}-${pkgver}"
 source=(
-    "${url}/releases/download/${pkgver}/${_fullname}.tar.gz"
+    "${url}/releases/download/${pkgver}/${_pkg}.tar.gz"
     'gitconfig'
     'gpg-public-key'
     'gpg-private-key'
@@ -32,29 +32,29 @@ package() {
 
     ### the main script ###
     install -Dm755 \
-            "$_fullname"/edrdg_dictionary_archive.fish \
+            "$_pkg"/edrdg_dictionary_archive.fish \
             "$pkgdir"/usr/bin/edrdg_dictionary_archive
 
     ### documentation files ###
     install -Dm644 \
-            "$_fullname"/README.md \
+            "$_pkg"/README.md \
             -t "$pkgdir"/usr/share/doc/"$pkgname"/
 
     install -Dm644 \
-            "$_fullname"/LICENSE \
+            "$_pkg"/LICENSE \
             -t "$pkgdir"/usr/share/licenses/"$pkgname"/
 
     ### systemd files ###
     install -Dm644 \
-            "$_fullname"/systemd/edrdg-dictionary-archive-update.{timer,service} \
+            "$_pkg"/systemd/edrdg-dictionary-archive-update.{timer,service} \
             -t "$pkgdir"/usr/lib/systemd/system/
 
     install -Dm644 \
-            "$_fullname"/systemd/"$_servicename".sysusers \
+            "$_pkg"/systemd/"$_servicename".sysusers \
             "$pkgdir"/usr/lib/sysusers.d/"$_servicename".conf
 
     install -Dm644 \
-            "$_fullname"/systemd/"$_servicename".tmpfiles \
+            "$_pkg"/systemd/"$_servicename".tmpfiles \
             "$pkgdir"/usr/lib/tmpfiles.d/"$_servicename".conf
 
     ### credential and config files ###
